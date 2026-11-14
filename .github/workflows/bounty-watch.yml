@@ -1,0 +1,53 @@
+name: Bounty Watch
+
+# One-shot poll every 5 minutes on a GitHub-hosted Linux runner.
+# State (discovery watermark, pending jobs, delivery receipts) is restored from and
+# saved back to the `bounty-state` branch, so it survives between runs.
+on:
+  schedule:
+    - cron: '2-57/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write   # only used to push state.json to the bounty-state branch
+
+concurrency:
+  group: bounty-watch
+  cancel-in-progress: false   # never overlap; a queued run waits for the current one
+
+jobs:
+  poll:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Check out saved state
+        uses: actions/checkout@v5
+        with:
+          ref: bounty-state
+          path: .bounty-state
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '24.22.1'
+
+      - name: Poll, triage and alert
+        env:
+          GITHUB_TOKEN: ${{ secrets.BOUNTY_GITHUB_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-3.8-flash' }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          REQUEST_TIMEOUT_MS: '120000'
+        run: bash .github/bounty-watch/run.sh
+
+      - name: Save state
+        if: always()
+        run: bash .github/bounty-watch/save-state.sh
