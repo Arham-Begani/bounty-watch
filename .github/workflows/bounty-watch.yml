@@ -18,7 +18,7 @@ concurrency:
 jobs:
   poll:
     runs-on: ubuntu-24.04
-    timeout-minutes: 8
+    timeout-minutes: 12
     steps:
       - name: Check out code
         uses: actions/checkout@v5
@@ -46,6 +46,10 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           REQUEST_TIMEOUT_MS: '120000'
+          # GitHub's secondary rate limit trips on full-text searches sent 2.2 s apart;
+          # pace searches and leave room for its 60 s back-offs.
+          SEARCH_INTERVAL_MS: '8000'
+          RUN_BUDGET_MS: '480000'
         run: bash .github/bounty-watch/run.sh
 
       - name: Save state

@@ -19,7 +19,7 @@ elif [ -n "${OPENAI_API_KEY:-}" ]; then
   export LLM_MODE=openai
 fi
 
-timeout --signal=TERM --kill-after=30 300 node src/main.ts 2>&1 | tee -a "$LOG"
+timeout --signal=TERM --kill-after=30 540 node src/main.ts 2>&1 | tee -a "$LOG"
 rc=${PIPESTATUS[0]}
 if [ -n "$ADAPTER" ]; then kill "$ADAPTER" 2>/dev/null; wait "$ADAPTER" 2>/dev/null; fi
 grep -h '"event":"gemini' "$LOG" | grep -v gemini_adapter_ready || true
