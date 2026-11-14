@@ -4,12 +4,13 @@ import { GitHub, searchQueries } from '../src/github.ts';
 import { Http } from '../src/http.ts';
 import { readConfig } from '../src/config.ts';
 const cfg = readConfig({GITHUB_TOKEN: 'test', LLM_MODE: 'webhook', LLM_WEBHOOK_URL: 'http://127.0.0.1/triage', DISCORD_WEBHOOK_URL: 'http://127.0.0.1/discord'});
-test('fans out every language and predicate plus the External search', () => {
+test('fans out label searches per language, body searches once, plus the External search', () => {
   const queries = searchQueries();
-  assert.equal(queries.length, 17);
+  assert.equal(queries.length, 11);
   for (const lang of ['TypeScript','Rust','JavaScript','Python']) {
-    assert.equal(queries.filter(q => q.includes(`language:${lang}`)).length, 4);
+    assert.equal(queries.filter(q => q.includes(`language:${lang}`)).length, 2);
   }
+  assert.equal(queries.filter(q => q.includes('in:body') && !q.includes('language:')).length, 2);
   assert.ok(queries.includes('repo:Expensify/App is:open is:issue label:External no:assignee'));
   assert.ok(queries.every(q => q.includes('no:assignee')));
 });

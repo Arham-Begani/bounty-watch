@@ -48,7 +48,7 @@ jobs:
           REQUEST_TIMEOUT_MS: '120000'
           # GitHub's secondary rate limit trips on full-text searches sent 2.2 s apart;
           # pace searches and leave room for its 60 s back-offs.
-          SEARCH_INTERVAL_MS: '8000'
+          SEARCH_INTERVAL_MS: '6000'
           RUN_BUDGET_MS: '480000'
         run: bash .github/bounty-watch/run.sh
 

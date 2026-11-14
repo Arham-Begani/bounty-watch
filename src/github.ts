@@ -4,8 +4,12 @@ import { array, bool, integer, iso, record, repoName, string, utc } from './util
 export const LANGUAGES = new Set(['TypeScript', 'Rust', 'JavaScript', 'Python']);
 export function searchQueries(): string[] {
   const queries: string[] = [];
-  for (const language of LANGUAGES) for (const predicate of ['label:"💎 Bounty"','label:"bounty"','"algora.io" in:body','"opire.dev" in:body'])
+  for (const language of LANGUAGES) for (const predicate of ['label:"💎 Bounty"','label:"bounty"'])
     queries.push(`is:open is:issue no:assignee language:${language} ${predicate}`);
+  // Full-text body searches are expensive for GitHub and trip its secondary rate limit when
+  // fanned out per language, so run each once; runOnce() still drops repos outside LANGUAGES.
+  for (const term of ['"algora.io" in:body', '"opire.dev" in:body'])
+    queries.push(`is:open is:issue no:assignee ${term}`);
   queries.push('repo:Expensify/App is:open is:issue label:External no:assignee');
   return queries;
 }

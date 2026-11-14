@@ -82,7 +82,7 @@ test('complete HTTP pipeline persists alerts and resumes only failed destination
     assert.equal(await runOnce(config),true);
     assert.equal(triages,1);assert.equal(alerts,1);assert.equal(telegrams,2);
     assert.equal(await runOnce(config),true);
-    assert.equal(triages,1);assert.equal(alerts,1);assert.equal(telegrams,2);assert.equal(searches,51);
+    assert.equal(triages,1);assert.equal(alerts,1);assert.equal(telegrams,2);assert.equal(searches,33);
     const completed=JSON.parse(await readFile(join(dir,'state.json'),'utf8')) as State;
     assert.equal(completed.jobs['10']?.pending,false);
     const alert=completed.jobs['10']?.alert as Alert;
